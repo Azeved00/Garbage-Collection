@@ -51,11 +51,12 @@ bool bistree_insert(BisTree* tree, int data) {
     BiTreeNode* node = (BiTreeNode*)my_malloc(sizeof(BiTreeNode));
     if (node == NULL)
     {
-        printf("BAD malloc at bistree_insert, line 54");
+        printf("BAD malloc at bistree_insert, line 54\n");
         exit(1);
     }
     tree->root = bitreenode_insert(tree->root, data, node);
     tree->size = tree->size + 1;
+    bistree_inorder(tree);
     return true;
 }
 
