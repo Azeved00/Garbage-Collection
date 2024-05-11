@@ -17,7 +17,6 @@
         devShells."${system}".default = pkgs.mkShell {
             inherit name ROOT;
 
-            NIX_SHELL_NAME=name;
             buildInputs = with pkgs; [
                 gcc
                 gdb
@@ -25,10 +24,10 @@
             ];
 
             shellHook = ''
-                echo -ne "\033]0;${name}\007"
-
-                alias "compile"="pushd ${ROOT} '''&'''& make all '''&'''& popd"
-                echo "${ROOT}"
+                alias "compile"="pushd ${ROOT}; make all; popd"
+                alias "run"="compile; ${ROOT}/bin/mutator"
+                alias "debug"="compile; gdb ${ROOT}/bin/mutator -x ${ROOT}/gdb.conf"
+                alias "debugc"="compile; gdb ${ROOT}/bin/mutator ${ROOT}/core -x ${ROOT}/gdb.conf"
             '';
 
         };
