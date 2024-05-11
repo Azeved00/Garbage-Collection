@@ -52,7 +52,9 @@ int main(int argc, char** argv) {
    while(mutate) {
         float toss = (float)random() / (float)RAND_MAX;
         if( toss > threshold ) { // add nodes
+            fprintf(stdout, "------------------------------------------------------------\n");
             fprintf(stdout, "creating a new tree\n");
+            fprintf(stdout, "------------------------------------------------------------\n");
             /* build new bistree */
             BisTree* t = (BisTree*)malloc(sizeof(BisTree));
             bistree_init(t);
@@ -65,17 +67,18 @@ int main(int argc, char** argv) {
                 bistree_insert(t, random() % MAX_KEY_VALUE);
             }
             fprintf(stdout, "tree size is %d\n", bistree_size(t));
-            fprintf(stdout, "(inorder traversal)\n");
-            bistree_inorder(t);
             fprintf(stdout, "number of trees %d\n",roots->size);
+            bistree_fancy(t);
         } 
         else { // remove nodes
              /* skip if there are no roots to manipulate */
             if (list_isempty(roots))
                 continue;
-            fprintf(stdout, "deleting nodes from a tree\n");
             /* otherwise, choose random root to operate on */
             int index = random() % list_size(roots);
+            fprintf(stdout, "------------------------------------------------------------\n");
+            fprintf(stdout, "deleting nodes from tree %d\n", index);
+            fprintf(stdout, "------------------------------------------------------------\n");
             BisTree* chosen  = list_get(roots, index);
             int number_nodes = bistree_size(chosen);
             int number_tries = random() % number_nodes;
@@ -84,9 +87,9 @@ int main(int argc, char** argv) {
                 /* this is checked in bistree_remove */
                 bistree_remove(chosen, random() % MAX_KEY_VALUE);
             }
+            fprintf(stdout, "number of trees %d\n",roots->size);
             fprintf(stdout, "tree size is %d\n", bistree_size(chosen));
-            fprintf(stdout, "(inorder traversal)\n");
-            bistree_inorder(chosen);
+            bistree_fancy(chosen);
         }
     }
    /* caught ^C ! */

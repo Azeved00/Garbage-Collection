@@ -30,6 +30,8 @@ bool bistree_lookup(BisTree* tree, int data);
 
 void bistree_inorder(BisTree* tree);
 
+void bistree_fancy(BisTree* tree);
+
 #define bistree_size(tree)    ((tree)->size)
 
 #endif

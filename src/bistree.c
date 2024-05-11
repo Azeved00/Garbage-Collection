@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "bool.h"
 #include "bistree.h"
@@ -56,7 +57,7 @@ bool bistree_insert(BisTree* tree, int data) {
     }
     tree->root = bitreenode_insert(tree->root, data, node);
     tree->size = tree->size + 1;
-    bistree_inorder(tree);
+    //bistree_inorder(tree);
     return true;
 }
 
@@ -100,4 +101,39 @@ void bistree_inorder(BisTree* tree) {
    printf("root: %p\n", tree);
    bitreenode_inorder(tree->root);
    printf("\n");
+}
+
+void bitreenode_fancy(char* prefix, BiTreeNode* node, bool isLeft)
+{
+
+    char nprefix[100];
+    strcpy(nprefix, prefix);
+    printf("%s",nprefix);
+    
+    if(isLeft)
+        printf( "├──");
+    else
+        printf("└──" );
+
+    // print the value of the node
+    if( node == NULL){
+        printf("\n");
+        return;
+    }
+    printf("%d\n",node->data);
+
+    
+    if(isLeft)
+        strcat(nprefix,"│   ");
+    else 
+        strcat(nprefix,"    ");
+
+    // enter the next tree level - left and right branch
+    bitreenode_fancy( nprefix, node->left, true);
+    bitreenode_fancy( nprefix, node->right, false);
+}
+
+void bistree_fancy(BisTree* t)
+{
+    bitreenode_fancy("", t->root, false);    
 }
