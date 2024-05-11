@@ -9,12 +9,14 @@
 #include "globals.h"
 
 _block_header* get_header(void* ptr){
-    return (_block_header*) ptr - sizeof(_block_header);
+    return (_block_header*) (ptr - sizeof(_block_header));
 }
-void mark_tree_node(BiTreeNode* node){
-    if (node != NULL) return;
 
-    _block_header* header =  get_header((void*) &node);
+void mark_tree_node(BiTreeNode* node){
+    if (node == NULL) return;
+
+    _block_header* header =  get_header((void*) node);
+    if (header->marked) return;
     header->marked = true;
     mark_tree_node(node->left);
     mark_tree_node(node->right);
@@ -22,11 +24,14 @@ void mark_tree_node(BiTreeNode* node){
 }
 
 void mark_sweep_gc(List* roots) {
+    printf("-----------------------gcing()-------------------------------\n");
+
     if (roots->size <= 0) return;
     int cleaned = 0;
 
     //mark phase,
-    //for each root, traverse the tree and mark all true
+    //for each root,
+    //  traverse tree and mark all nodes
     ListNode* root_now = roots->first;
     while (root_now != NULL){
          BiTreeNode* data = root_now->data;
@@ -34,28 +39,26 @@ void mark_sweep_gc(List* roots) {
          root_now = root_now->next;
     }
 
-    _block_header* heap_now = (_block_header*) heap->base;
-    void* last_free = heap->freeb;
-    while(heap_now != NULL){
-        if(heap_now->marked == false){
-            heap_now->ptr = last_free;
-            last_free = heap_now;
-            cleaned++;
-        }
-
-        heap_now->marked = false;
-        heap_now += sizeof(_block_header*) + heap_now->size;
-    }
-
-
-   /*
+    /*
     * sweep phase:
     * go through entire heap,
     * add unmarked to free list
     */
-   printf("gcing()...\n");
-   printf("cleaned: %d\n",cleaned);
-   return;
+    _block_header* heap_now = (_block_header*) heap->base;
+    while(heap_now != (_block_header*) heap->top){
+        if(!heap_now->marked){
+            heap_now->ptr = heap->freeb;
+            heap->freeb = (char*) heap_now;
+            cleaned++;
+        }
+
+        heap_now->marked = false;
+        // typecast everything to avoid C making weird things when doing pointer arithmetic
+        heap_now = (_block_header*) ((void*) heap_now + sizeof(_block_header) + heap_now->size);
+    }
+    printf("cleaned: %d\n",cleaned);
+    printf("-------------------------------------------------------------\n");
+    return;
  }
 
 void mark_compact_gc(List* roots) {
