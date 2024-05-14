@@ -9,6 +9,7 @@
 #include "bool.h"
 #include "bistree.h"
 #include "heap.h"
+#include "ascii_tree.h"
 
 void bistree_init(BisTree* tree) {
     tree->root = NULL;
@@ -135,5 +136,6 @@ void bitreenode_fancy(char* prefix, BiTreeNode* node, bool isLeft)
 
 void bistree_fancy(BisTree* t)
 {
-    bitreenode_fancy("", t->root, false);    
+    //bitreenode_fancy("", t->root, false);    
+    print_ascii_tree(t->root);
 }
