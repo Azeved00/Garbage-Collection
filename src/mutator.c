@@ -17,6 +17,7 @@
 #define  MAX_NODES      100
 #define  MIN_NODES      5
 #define  MAX_KEY_VALUE  100
+#define  MAX_ITER       3000
 
 //#define HEAP_SIZE    (1024 * 1024)  /* 1 MByte */
 #define HEAP_SIZE    (1024 * 20)  /* 20 KByte */
@@ -24,11 +25,9 @@
 Heap* heap;
 List* roots;
 
-static bool mutate;
+static int mutate;
 
-static void sigint_handler() {
-   mutate = false;
-}
+static void sigint_handler() {mutate = 0;}
 
 int main(int argc, char** argv) {
    /*
@@ -48,7 +47,7 @@ int main(int argc, char** argv) {
    list_init(roots);
 
    srandom(getpid());
-   mutate = true;
+   mutate = MAX_ITER;
    while(mutate) {
         float toss = (float)random() / (float)RAND_MAX;
         if( toss > threshold ) { // add nodes
@@ -91,6 +90,7 @@ int main(int argc, char** argv) {
             fprintf(stdout, "tree size is %d\n", bistree_size(chosen));
             bistree_fancy(chosen);
         }
+        mutate -= 1;
     }
    /* caught ^C ! */
    printf("quiting...\n");
