@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
    heap  = (Heap*)malloc(sizeof(Heap));
    roots = (List*)malloc(sizeof(List));
 
-   heap_init(heap, HEAP_SIZE, mark_sweep_gc);
+   heap_init(heap, HEAP_SIZE, collect_garbage);
    list_init(roots);
 
    srandom(getpid());
