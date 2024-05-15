@@ -12,6 +12,10 @@
 #include "../lib/mark_compact.h"
 #include "../lib/copy_collect.h"
 
+#define MARK_SWEEP
+//#define MARK_COLLECT
+//#define COPY_COLLECT
+
 _block_header* get_header(void* ptr){
     return (_block_header*) (((char*)ptr) - sizeof(_block_header));
 }
@@ -36,12 +40,29 @@ void heap_destroy(Heap* heap) {
 
 void collect_garbage(List* roots){
     printf("-----------------------gcing()-------------------------------\n");
+#ifdef MARK_SWEEP
     int cleaned = mark_sweep_gc(roots);
+#endif
+#ifdef MARK_COMPACT
+    int cleaned = mark_compact_gc(roots);
+#endif
+#ifdef COPY_COLLECT
+    int cleaned = copy_collect_gc(roots);
+#endif
 
     printf("cleaned: %d\n",cleaned);
     printf("-------------------------------------------------------------\n");
 }
 
 void* my_malloc(unsigned int nbytes) {
-    return mark_sweep_malloc(nbytes);
+#ifdef MARK_SWEEP
+    void* res = mark_sweep_malloc(nbytes);
+#endif
+#ifdef MARK_COMPACT
+    void* res = mark_compact_malloc(nbytes);
+#endif
+#ifdef COPY_COLLECT
+    void* res = copy_collect_malloc(nbytes);
+#endif
+    return res;
 }
