@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "list.h"
 
-void* mark_collect_malloc(unsigned int nbytes);
-int mark_collect_gc(List* roots);
+void* mark_compact_malloc(unsigned int nbytes);
+int mark_compact_gc(List* roots);
 
 #endif

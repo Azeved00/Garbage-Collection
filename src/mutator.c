@@ -16,7 +16,7 @@
 #define  MAX_NODES      5
 #define  MIN_NODES      1
 #define  MAX_KEY_VALUE  100
-#define  MAX_ITER       3000
+#define  MAX_ITER       -1
 #define  MONO           true
 
 #define HEAP_SIZE    (1024)

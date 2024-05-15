@@ -16,7 +16,7 @@
 void mark_tree_node_cc(BiTreeNode* node){
     if (node == NULL) return;
 
-    _block_header* header =  get_header((void*) node);
+    _block_header* header =  get_header((char*) node);
     if (header->marked) {
         printf("ERROR: already marked @ collector.c:24\n");
         exit(1);

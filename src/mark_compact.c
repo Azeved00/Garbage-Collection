@@ -16,7 +16,7 @@
 void mark_tree_node_mc(BiTreeNode* node){
     if (node == NULL) return;
 
-    _block_header* header =  get_header((void*) node);
+    _block_header* header =  get_header((char*) node);
     if (header->marked) {
         printf("ERROR: already marked @ collector.c:24\n");
         exit(1);
@@ -30,45 +30,28 @@ void mark_tree_node_mc(BiTreeNode* node){
 }
 
 void* mark_compact_malloc(unsigned int nbytes) {
-    if( heap->top + sizeof(_block_header) + nbytes < heap->limit ) {
-        _block_header* q = (_block_header*)(heap->top);
-        q->marked = false;
-        q->size   = nbytes;
-        q->ptr    = (char*) -1;
-        char *p = heap->top + sizeof(_block_header);
-        heap->top = heap->top + sizeof(_block_header) + nbytes;
-        return p;
-    } 
-    if (heap->freeb != NULL) {
-        // return this block and set the pointer to the next free block
-        char* rtn = heap->freeb;
-        heap->freeb = ((_block_header*) heap->freeb)->ptr;
-
-        //the returned pointer should point to the end of the header
-        return rtn+sizeof(_block_header);
-    }
-    else {
+    //if not enough space then call gc
+    if( heap->top + sizeof(_block_header) + nbytes >= heap->limit ) {
         printf("my_malloc: not enough space, performing GC...\n");
         heap->collector(roots);
         if (heap->freeb == NULL) {
             printf("my_malloc: not enough space after GC...\n");
             return NULL;
         }
-       
-        // return this block and set the pointer to the next free block
-        char* rtn = heap->freeb;
-        heap->freeb = ((_block_header*) heap->freeb)->ptr;
+    } 
+    _block_header* q = (_block_header*)(heap->top);
+    q->marked = false;
+    q->size   = nbytes;
+    q->ptr    = (char*) -1;
+    char *p = heap->top + sizeof(_block_header);
+    heap->top = heap->top + sizeof(_block_header) + nbytes;
+    return p;
+}
 
-        //the returned pointer should point to the end of the header
-        return rtn+sizeof(_block_header);
-        /*
-        if ( list_isempty(heap->_freeb) ) {
-          printf("my_malloc: not enough space after GC...");
-          return NULL;
-        }
-        return list_getfirst(heap->_freeb);
-        */
-    }
+BiTreeNode* get_new_pointer(BiTreeNode* prev){
+    char* new_ptr = (char*) (get_header((char*)prev)->ptr);
+    new_ptr = new_ptr + sizeof(_block_header);
+    return (BiTreeNode*) new_ptr;
 }
 
 int mark_compact_gc(List* roots) {
@@ -78,30 +61,68 @@ int mark_compact_gc(List* roots) {
     //mark phase:
     //for each root,
     //  traverse tree and mark all nodes
+    printf("Mark phase\n");
     ListNode* root_now = roots->first;
     while (root_now != NULL){
-         BiTreeNode* data = root_now->data;
-         mark_tree_node_mc(data);
+         BisTree* data = root_now->data;
+         mark_tree_node_mc(data->root);
          root_now = root_now->next;
     }
 
-    /*
-    * compact phase:
-    * go through entire heap,
-    * compute new addresses
-    * copy objects to new addresses
-    */
+    // compact phase:
     // compute new addresses 
-    _block_header* scan = (_block_header*) heap->base;
-    _block_header* free = scan;
-    while (scan < (_block_header*) heap->top) {
-        if (scan->marked) {
-            scan->ptr =  (char*) free;
-            free = free + scan->size;
+    printf("Compact phase\n");
+    printf("Computing new addresses\n");
+    char* scan = heap->base;
+    char* free = scan;
+    while (scan <  heap->top) {
+        _block_header* bh = (_block_header*) scan;
+        if (bh->marked) {
+            bh->ptr =  (char*) free;
+            free += sizeof(_block_header) + bh->size;
         }
-        scan = scan + scan->size;
+        scan += sizeof(_block_header) + bh->size;
     }
-    //update
+
+
+    //update pointers
+    // first update only roots
+    printf("Update roots\n");
+    root_now = roots->first;
+    while (root_now != NULL){
+         BisTree* data = root_now->data;
+         data->root = get_new_pointer(data->root);
+         root_now = root_now->next;
+    }
+
+    // then update internal references
+    printf("Update internal references\n");
+    scan = heap->base;
+    while (scan <  heap->top) {
+        _block_header*  bh = (_block_header*) scan;
+        BiTreeNode*   data = (BiTreeNode*) (scan+sizeof(_block_header));
+        if (bh->marked) {
+            if(data->left  != NULL)
+                data->left  = get_new_pointer(data->left);
+            if(data->right != NULL)
+                data->right = get_new_pointer(data->right);
+        }
+        scan += sizeof(_block_header) + bh->size;
+    }
+
+    //relocate objects
+    printf("Relocate Objects\n");
+    scan = heap->base;
+    while (scan <  heap->top) {
+        _block_header*  bh = (_block_header*) scan;
+        BiTreeNode*   data_old = (BiTreeNode*) (scan+sizeof(_block_header));
+        BiTreeNode*   data_new = get_new_pointer(data_old);
+        if (bh->marked) {
+            *data_new = *data_old;
+        }
+        bh->marked = false;
+        scan += sizeof(_block_header) + bh->size;
+    }
 
     return cleaned;
  }

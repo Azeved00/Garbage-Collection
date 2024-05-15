@@ -12,12 +12,12 @@
 #include "../lib/mark_compact.h"
 #include "../lib/copy_collect.h"
 
-#define MARK_SWEEP
-//#define MARK_COLLECT
+//#define MARK_SWEEP
+#define MARK_COMPACT
 //#define COPY_COLLECT
 
-_block_header* get_header(void* ptr){
-    return (_block_header*) (((char*)ptr) - sizeof(_block_header));
+_block_header* get_header(char* ptr){
+    return (_block_header*) (ptr - sizeof(_block_header));
 }
 
 void heap_init(Heap* heap, unsigned int size, void (*collector)(List*)){

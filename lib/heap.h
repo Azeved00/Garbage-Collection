@@ -23,7 +23,7 @@ typedef struct {
    void (*collector)(List*);
 } Heap;
 
-_block_header* get_header(void* ptr);
+_block_header* get_header(char* ptr);
 
 void heap_init(Heap* heap, unsigned int size, void (*collector)(List*));
 
