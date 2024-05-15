@@ -7,12 +7,11 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "bool.h"
-#include "heap.h"
-#include "list.h"
-#include "bistree.h"
-#include "globals.h"
-#include "collector.h"
+#include "../lib/bool.h"
+#include "../lib/heap.h"
+#include "../lib/list.h"
+#include "../lib/bistree.h"
+#include "../lib/globals.h"
 
 #define  MAX_NODES      5
 #define  MIN_NODES      1

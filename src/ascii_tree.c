@@ -6,7 +6,7 @@ Source: http://web.archive.org/web/20071224095835/http://www.openasthra.com:80/w
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "bistree.h"
+#include "../lib/bistree.h"
 
 
 

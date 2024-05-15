@@ -23,9 +23,13 @@ typedef struct {
    void (*collector)(List*);
 } Heap;
 
+_block_header* get_header(void* ptr);
+
 void heap_init(Heap* heap, unsigned int size, void (*collector)(List*));
 
 void heap_destroy(Heap* heap);
+
+void collect_garbage(List* roots);
 
 void* my_malloc(unsigned int nbytes);
 

@@ -17,16 +17,20 @@ LIBFLS =
 # *  Define the source files.                                                *
 
 SRCFLS = src/mutator.c \
-         src/collector.c \
 	     src/heap.c \
          src/bistree.c \
          src/ascii_tree.c \
+         src/mark_sweep.c \
+         src/mark_compact.c \
+         src/copy_collect.c \
 		 src/list.c
 
 # *  Define the object files.                                                *
 
 OBJFLS = bin/mutator.o \
-		 bin/collector.o \
+		 bin/mark_sweep.o \
+		 bin/mark_compact.o \
+		 bin/copy_collect.o \
          bin/heap.o \
          bin/bistree.o \
          bin/ascii_tree.o \
@@ -68,9 +72,9 @@ clean:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-bin/mutator.o: src/bool.h src/globals.h src/list.h src/bistree.h src/bistree.c
-bin/heap.o: src/heap.h src/globals.h src/heap.c
-bin/bistree.o: src/bool.h src/bistree.h src/ascii_tree.h src/bistree.c
-bin/list.o: src/bool.h src/list.h src/list.c
-bin/collector.o: src/collector.h src/collector.c src/list.h src/list.c
-bin/ascii_tree.o: src/bistree.h src/ascii_tree.h src/ascii_tree.c
+#bin/mutator.o: src/bool.h src/globals.h src/list.h src/bistree.h src/mutator.c
+#bin/heap.o: src/heap.h src/globals.h src/heap.c
+#bin/bistree.o: src/bool.h src/bistree.h src/ascii_tree.h src/bistree.c
+#bin/list.o: src/bool.h src/list.h src/list.c
+#bin/collector.o: src/collector.h src/collector.c src/list.h src/list.c
+#bin/ascii_tree.o: src/bistree.h src/ascii_tree.h src/ascii_tree.c

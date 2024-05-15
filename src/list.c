@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "bool.h"
-#include "list.h"
-#include "heap.h"
+#include "../lib/bool.h"
+#include "../lib/list.h"
+#include "../lib/heap.h"
 
 
 void list_init(List* list) {

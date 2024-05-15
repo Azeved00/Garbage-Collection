@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "bool.h"
-#include "bistree.h"
-#include "heap.h"
-#include "ascii_tree.h"
+#include "../lib/bool.h"
+#include "../lib/bistree.h"
+#include "../lib/heap.h"
+#include "../lib/ascii_tree.h"
 
 void bistree_init(BisTree* tree) {
     tree->root = NULL;
