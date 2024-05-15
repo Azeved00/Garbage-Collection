@@ -3,6 +3,11 @@
  */
 
 #include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <signal.h>
 
 #include "list.h"
 #include "bistree.h"
@@ -12,14 +17,19 @@
 //HELPER FUNCTIONS
 //-----------------------------------
 _block_header* get_header(void* ptr){
-    return (_block_header*) (ptr - sizeof(_block_header));
+    return (_block_header*) (((char*)ptr) - sizeof(_block_header));
 }
 
 void mark_tree_node(BiTreeNode* node){
     if (node == NULL) return;
 
     _block_header* header =  get_header((void*) node);
-    if (header->marked) return;
+    if (header->marked) {
+        printf("ERROR: already marked @ collector.c:24\n");
+        exit(1);
+        return;
+    }
+
     header->marked = true;
     mark_tree_node(node->left);
     mark_tree_node(node->right);
@@ -33,13 +43,14 @@ int mark_sweep_gc(List* roots) {
     if (roots->size <= 0) return 0;
     int cleaned = 0;
 
+    assert(heap->freeb == NULL);
     //mark phase,
     //for each root,
     //  traverse tree and mark all nodes
     ListNode* root_now = roots->first;
     while (root_now != NULL){
-         BiTreeNode* data = root_now->data;
-         mark_tree_node(data);
+         BisTree* data = root_now->data;
+         mark_tree_node(data->root);
          root_now = root_now->next;
     }
 
@@ -49,7 +60,7 @@ int mark_sweep_gc(List* roots) {
     * add unmarked to free list
     */
     _block_header* heap_now = (_block_header*) heap->base;
-    while(heap_now != (_block_header*) heap->top){
+    while(heap_now < (_block_header*) heap->top){
         if(!heap_now->marked){
             heap_now->ptr = heap->freeb;
             heap->freeb = (char*) heap_now;
@@ -58,7 +69,7 @@ int mark_sweep_gc(List* roots) {
 
         heap_now->marked = false;
         // typecast everything to avoid C making weird things when doing pointer arithmetic
-        heap_now = (_block_header*) ((void*) heap_now + sizeof(_block_header) + heap_now->size);
+        heap_now = (_block_header*) (((char*) heap_now) + sizeof(_block_header) + sizeof(BiTreeNode));
     }
 
     return cleaned;

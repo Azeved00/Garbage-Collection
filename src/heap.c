@@ -30,15 +30,7 @@ void heap_destroy(Heap* heap) {
 }
 
 void* my_malloc(unsigned int nbytes) {
-    if (heap->freeb != NULL) {
-        // return this block and set the pointer to the next free block
-        char* rtn = heap->freeb;
-        heap->freeb = ((_block_header*) heap->freeb)->ptr;
-
-        //the returned pointer should point to the end of the header
-        return (void*) rtn+sizeof(_block_header);
-    }
-    else if( heap->top + sizeof(_block_header) + nbytes < heap->limit ) {
+    if( heap->top + sizeof(_block_header) + nbytes < heap->limit ) {
         _block_header* q = (_block_header*)(heap->top);
         q->marked = false;
         q->size   = nbytes;
@@ -47,6 +39,14 @@ void* my_malloc(unsigned int nbytes) {
         heap->top = heap->top + sizeof(_block_header) + nbytes;
         return p;
     } 
+    if (heap->freeb != NULL) {
+        // return this block and set the pointer to the next free block
+        char* rtn = heap->freeb;
+        heap->freeb = ((_block_header*) heap->freeb)->ptr;
+
+        //the returned pointer should point to the end of the header
+        return rtn+sizeof(_block_header);
+    }
     else {
         printf("my_malloc: not enough space, performing GC...\n");
         heap->collector(roots);
@@ -60,7 +60,7 @@ void* my_malloc(unsigned int nbytes) {
         heap->freeb = ((_block_header*) heap->freeb)->ptr;
 
         //the returned pointer should point to the end of the header
-        return (void*) rtn+sizeof(_block_header);
+        return rtn+sizeof(_block_header);
         /*
         if ( list_isempty(heap->_freeb) ) {
           printf("my_malloc: not enough space after GC...");
