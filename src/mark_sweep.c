@@ -87,15 +87,20 @@ int mark_sweep_gc(List* roots) {
 
     assert(heap->freeb == NULL);
 
-    //mark phase
+    if(VERBOSE >= 2){
+        printf("Mark phase\n");
+    }
     ListNode* root_now = roots->first;
     while (root_now != NULL){
          BisTree* data = root_now->data;
+         data->to_clean = 0;
          mark_tree_node_ms(data->root);
          root_now = root_now->next;
     }
 
-    // sweep phase
+    if(VERBOSE >= 2){
+        printf("Sweep phase\n");
+    }
     _block_header* heap_now = (_block_header*) heap->base;
     while(heap_now < (_block_header*) heap->top){
         if(!heap_now->marked){

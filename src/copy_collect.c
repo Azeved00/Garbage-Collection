@@ -119,7 +119,9 @@ int copy_collect_gc(List* roots) {
 
     list_init(heap->worklist);
     
-    //process each root
+    if(VERBOSE >= 2){
+        printf("Process each of the Roots\n");
+    }
     ListNode* root_now = roots->first;
     while (root_now != NULL){
          BisTree* data = root_now->data;
@@ -128,7 +130,9 @@ int copy_collect_gc(List* roots) {
          root_now = root_now->next;
     }
 
-    //work through the worklist
+    if(VERBOSE >= 2){
+        printf("Work Through the work list\n");
+    }
     while(!list_isempty(heap->worklist)){
         char* bh_ref = list_getfirst(heap->worklist);
         list_removefirst(heap->worklist);
@@ -138,6 +142,9 @@ int copy_collect_gc(List* roots) {
         process(&data_ref->right);
     } 
 
+    if(VERBOSE >= 2){
+        printf("Cleaning Up\n");
+    }
     int cleaned = ((heap->top - heap->to_space) - (heap->freeb - heap->base)) / (sizeof(_block_header)+sizeof(BiTreeNode));
     heap->top = heap->freeb;
     return cleaned; 

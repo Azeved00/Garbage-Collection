@@ -45,12 +45,21 @@ void collect_garbage(List* roots){
     int cleaned = 0;
     switch(ALGO){
         case 1:
+            if(VERBOSE >= 2){
+                printf("Using Mark & Sweep\n");
+            }
             cleaned = mark_sweep_gc(roots);
             break;
         case 2:
+            if(VERBOSE >= 2){
+                printf("Using Mark & Compact\n");
+            }
             cleaned = mark_compact_gc(roots);
             break;
         case 3:
+            if(VERBOSE >= 2){
+                printf("Using Copy & Collect\n");
+            }
             cleaned = copy_collect_gc(roots);
             break;
         default:
@@ -59,7 +68,7 @@ void collect_garbage(List* roots){
     }
 
     if(VERBOSE>=1){
-        printf("cleaned: %d\n",cleaned);
+        printf("Cleaned Objects: %d\n",cleaned);
         printf("-------------------------------------------------------------\n");
     }
 }

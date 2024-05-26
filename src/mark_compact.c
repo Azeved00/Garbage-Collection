@@ -81,10 +81,9 @@ int mark_compact_gc(List* roots) {
     if (roots->size <= 0) return 0;
     int cleaned = 0;
 
-    //mark phase:
-    //for each root,
-    //  traverse tree and mark all nodes
-    printf("Mark phase\n");
+    if(VERBOSE >= 2){
+        printf("Mark phase\n");
+    }
     ListNode* root_now = roots->first;
     while (root_now != NULL){
          BisTree* data = root_now->data;
@@ -92,10 +91,10 @@ int mark_compact_gc(List* roots) {
          root_now = root_now->next;
     }
 
-    // compact phase:
-    // compute new addresses 
-    printf("Compact phase\n");
-    printf("Computing new addresses\n");
+    if(VERBOSE >= 2){
+        printf("Compact phase\n");
+        printf("- Computing new addresses\n");
+    }
     char* scan = heap->base;
     char* free = scan;
     while (scan <  heap->top) {
@@ -108,9 +107,10 @@ int mark_compact_gc(List* roots) {
     }
 
 
-    //update pointers
-    // first update only roots
-    printf("Update roots\n");
+    if(VERBOSE >= 2){
+        printf("- Compact phase\n");
+        printf("\t- Update roots\n");
+    }
     root_now = roots->first;
     while (root_now != NULL){
          BisTree* data = root_now->data;
@@ -118,8 +118,9 @@ int mark_compact_gc(List* roots) {
          root_now = root_now->next;
     }
 
-    // then update internal references
-    printf("Update internal references\n");
+    if(VERBOSE >= 2){
+        printf("\t- Update internal references\n");
+    }
     scan = heap->base;
     while (scan <  heap->top) {
         _block_header*  bh = (_block_header*) scan;
@@ -133,8 +134,9 @@ int mark_compact_gc(List* roots) {
         scan += sizeof(_block_header) + bh->size;
     }
 
-    //relocate objects
-    printf("Relocate Objects\n");
+    if(VERBOSE >= 2){
+        printf("- Relocate Objects\n");
+    }
     scan = heap->base;
     while (scan <  heap->top) {
         _block_header*  bh = (_block_header*) scan;
