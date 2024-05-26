@@ -12,7 +12,9 @@
 #include "../lib/heap.h"
 #include "../lib/globals.h"
 #include "../lib/mark_compact.h"
-
+/*
+ *  Mark Nodes recursively
+ */
 void mark_tree_node_mc(BiTreeNode* node){
     if (node == NULL) return;
 
@@ -29,12 +31,18 @@ void mark_tree_node_mc(BiTreeNode* node){
     return;
 }
 
+/*
+ *  Mark and compact malloc:
+ *  1. Check if you can allocate a block normally
+ *  2. You can not allocate and therefore perform GC,
+ *      if no block was freed by the GC then return NULL
+ */ 
 void* mark_compact_malloc(unsigned int nbytes) {
     //if not enough space then call gc
     if( heap->top + sizeof(_block_header) + nbytes >= heap->limit ) {
         printf("my_malloc: not enough space, performing GC...\n");
         heap->collector(roots);
-        if (heap->freeb == NULL) {
+        if (heap->top + sizeof(_block_header) + nbytes >= heap->limit) {
             printf("my_malloc: not enough space after GC...\n");
             return NULL;
         }
@@ -48,12 +56,27 @@ void* mark_compact_malloc(unsigned int nbytes) {
     return p;
 }
 
+/*
+ * Returns the new address of the BiTreeNode Given
+ */
 BiTreeNode* get_new_pointer(BiTreeNode* prev){
     char* new_ptr = (char*) (get_header((char*)prev)->ptr);
     new_ptr = new_ptr + sizeof(_block_header);
     return (BiTreeNode*) new_ptr;
 }
 
+/*
+ *  Mark & compact Garbage Collector:
+ *  1. Mark Phase:
+ *      Mark Nodes of each of the Root Tree
+ *
+ *  2. Compact Phase:
+ *      a. Compute the new addresses:
+ *      b. Update Pointers
+ *          I. Update Roots
+ *          II.Update Internal References of Nodes
+ *      c. Relocate Objects to their new positions
+ */
 int mark_compact_gc(List* roots) {
     if (roots->size <= 0) return 0;
     int cleaned = 0;
@@ -120,9 +143,13 @@ int mark_compact_gc(List* roots) {
         if (bh->marked) {
             *data_new = *data_old;
         }
+        else {
+            cleaned++;
+        }
         bh->marked = false;
         scan += sizeof(_block_header) + bh->size;
     }
+    heap->top = free;
 
     return cleaned;
  }

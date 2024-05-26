@@ -11,7 +11,9 @@
 #include "../lib/globals.h"
 #include "../lib/heap.h"
 #include "../lib/mark_sweep.h"
-
+/*
+ *  Mark Nodes recursively
+ */
 void mark_tree_node_ms(BiTreeNode* node){
     if (node == NULL) return;
 
@@ -28,6 +30,13 @@ void mark_tree_node_ms(BiTreeNode* node){
     return;
 }
 
+/*
+ *  Mark and sweep malloc:
+ *  1. Check if you can allocate a block normally
+ *  2. Check if you can allocate a block from the free_blocks list
+ *  3. You can not allocate and therefore perform GC,
+ *      if no block was freed by the GC then return NULL
+ */ 
 void* mark_sweep_malloc(unsigned int nbytes) {
     if( heap->top + sizeof(_block_header) + nbytes < heap->limit ) {
         _block_header* q = (_block_header*)(heap->top);
@@ -60,24 +69,25 @@ void* mark_sweep_malloc(unsigned int nbytes) {
 
         //the returned pointer should point to the end of the header
         return rtn+sizeof(_block_header);
-        /*
-        if ( list_isempty(heap->_freeb) ) {
-          printf("my_malloc: not enough space after GC...");
-          return NULL;
-        }
-        return list_getfirst(heap->_freeb);
-        */
     }
 }
 
+/*
+ *  Mark And Sweep Garbage Collection:
+ *  1. Mark Phase: 
+ *      Mark Nodes of each of the Root Tree
+ *
+ *  2. Sweep Phase:
+ *      go through entire heao
+ *      add unmarked blocks to free list
+ */
 int mark_sweep_gc(List* roots) {
     if (roots->size <= 0) return 0;
     int cleaned = 0;
 
     assert(heap->freeb == NULL);
-    //mark phase,
-    //for each root,
-    //  traverse tree and mark all nodes
+
+    //mark phase
     ListNode* root_now = roots->first;
     while (root_now != NULL){
          BisTree* data = root_now->data;
@@ -85,11 +95,7 @@ int mark_sweep_gc(List* roots) {
          root_now = root_now->next;
     }
 
-    /*
-    * sweep phase:
-    * go through entire heap,
-    * add unmarked to free list
-    */
+    // sweep phase
     _block_header* heap_now = (_block_header*) heap->base;
     while(heap_now < (_block_header*) heap->top){
         if(!heap_now->marked){
