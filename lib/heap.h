@@ -18,7 +18,9 @@ typedef struct {
    char*        base;
    char*        top;
    char*        limit;
+   char*        to_space;
    List*        _freeb;
+   List*        worklist;
    char*        freeb;
    void (*collector)(List*);
 } Heap;

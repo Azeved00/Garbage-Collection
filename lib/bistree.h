@@ -16,6 +16,7 @@ typedef struct BiTreeNode_ {
 
 typedef struct BiTree_ {
    int                size;
+   int                to_clean;
    BiTreeNode*        root;
 } BisTree;
 

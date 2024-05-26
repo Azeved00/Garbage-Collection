@@ -14,6 +14,7 @@
 void bistree_init(BisTree* tree) {
     tree->root = NULL;
     tree->size = 0;
+    tree->to_clean=0;
     return;
 }
 
@@ -87,6 +88,7 @@ bool bistree_remove(BisTree* tree, int data) {
       return false;
    tree->root = bitreenode_remove(tree->root, data);
    tree->size = tree->size - 1;
+   tree->to_clean = tree->to_clean +1;
    return true;
 }
 

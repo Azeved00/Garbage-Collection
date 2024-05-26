@@ -12,10 +12,6 @@
 #include "../lib/mark_compact.h"
 #include "../lib/copy_collect.h"
 
-//#define MARK_SWEEP
-#define MARK_COMPACT
-//#define COPY_COLLECT
-
 _block_header* get_header(char* ptr){
     return (_block_header*) (ptr - sizeof(_block_header));
 }
@@ -27,9 +23,13 @@ void heap_init(Heap* heap, unsigned int size, void (*collector)(List*)){
     heap->limit = heap->base + size;
     heap->top   = heap->base;
     heap->_freeb = (List*)malloc(sizeof(List));
+    heap->worklist = (List*)malloc(sizeof(List));
     list_init(heap->_freeb);
     heap->freeb = NULL;
     heap->collector = collector;
+    if(ALGO == 3){
+        heap->to_space = heap->base + ((heap->limit - heap->base) / 2);
+    }
     return;
 }
 
@@ -39,30 +39,46 @@ void heap_destroy(Heap* heap) {
 }
 
 void collect_garbage(List* roots){
-    printf("-----------------------gcing()-------------------------------\n");
-#ifdef MARK_SWEEP
-    int cleaned = mark_sweep_gc(roots);
-#endif
-#ifdef MARK_COMPACT
-    int cleaned = mark_compact_gc(roots);
-#endif
-#ifdef COPY_COLLECT
-    int cleaned = copy_collect_gc(roots);
-#endif
+    if(VERBOSE>=0){
+        printf("-----------------------gcing()-------------------------------\n");
+    }
+    int cleaned = 0;
+    switch(ALGO){
+        case 1:
+            cleaned = mark_sweep_gc(roots);
+            break;
+        case 2:
+            cleaned = mark_compact_gc(roots);
+            break;
+        case 3:
+            cleaned = copy_collect_gc(roots);
+            break;
+        default:
+            printf("Invalid GC algorithm %d, exiting...\n", ALGO);
+            exit(EXIT_FAILURE);
+    }
 
-    printf("cleaned: %d\n",cleaned);
-    printf("-------------------------------------------------------------\n");
+    if(VERBOSE>=1){
+        printf("cleaned: %d\n",cleaned);
+        printf("-------------------------------------------------------------\n");
+    }
 }
 
 void* my_malloc(unsigned int nbytes) {
-#ifdef MARK_SWEEP
-    void* res = mark_sweep_malloc(nbytes);
-#endif
-#ifdef MARK_COMPACT
-    void* res = mark_compact_malloc(nbytes);
-#endif
-#ifdef COPY_COLLECT
-    void* res = copy_collect_malloc(nbytes);
-#endif
+    void* res;
+    switch(ALGO){
+        case 1:
+            res = mark_sweep_malloc(nbytes);
+            break;
+        case 2:
+            res = mark_compact_malloc(nbytes);
+            break;
+        case 3:
+            res = copy_collect_malloc(nbytes);
+            break;
+        default:
+            printf("Invalid GC algorithm %d, exiting...\n", ALGO);
+            exit(EXIT_FAILURE);
+    }
     return res;
 }
