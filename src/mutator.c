@@ -31,7 +31,7 @@ static int mutate;
 static void sigint_handler() {mutate = 0;}
 
 void print_usage(FILE* x, char* cmd){
-    fprintf(x, "Usage: %s [--help]  [--verbose [<1|2>]] [--mono] [--algo <1|2|3>] [--iterations <itererations>] [--heap-size <heap_size>] <threshold>\n", cmd);
+    fprintf(x, "Usage: %s [--help]  [--verbose[<1|2>]] [--mono] [--algo <1|2|3>] [--iterations <itererations>] [--heap-size <heap_size>] <threshold>\n", cmd);
 }
 
 void main_loop(float threshold){
